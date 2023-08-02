@@ -9,4 +9,4 @@ $ pip install -r requirements.txt
 $ flask --app app --debug run
 ```
 
-Change folder path to desired path before running.
+Change folder path to desired path before running
