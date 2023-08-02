@@ -15,7 +15,6 @@ import speech_recognition as sr
 from app.photo_execute import *
 
 
- 
 @app.route('/')
 def index():
     """Render website's home page."""
@@ -54,26 +53,32 @@ def voicecommands():
 @app.route('/designs')
 #@login_required
 def designs():
-    """Render website's upload page."""
-    return render_template('designs.html')
+    # Call the get_uploaded_images function to get a list of filenames
+    filenames = get_edited_images()
+
+    # Generate a list of image URLs using the url_for function
+    image_urls = [url_for('get_design', filename=filename) for filename in filenames]
+
+    # Pass the list of image URLs to the template
+    return render_template('designs.html', image_urls=image_urls)
 
 @app.route('/scripts')
 #@login_required
 def scripts():
-    scripts = ExtendScripts.get_all_scripts()
+    scripts = get_uploaded_scripts()
     return render_template('scripts.html', scripts=scripts)
- 
-@app.route('/download_script/<int:script_id>')
-def download_script(script_id):
-    # Get the ExtendScripts object with the specified script_id
-    script = ExtendScripts.query.get(script_id)
 
-    if not script:
-        flash('Script not found', 'danger')
-        return redirect(url_for('scripts'))
+# @app.route('/download_script/<int:script_id>')
+# def download_script(script_id):
+#     # Get the ExtendScripts object with the specified script_id
+#     script = ExtendScripts.query.get(script_id)
 
-    # Serve the file for download
-    return send_file(script.script_file_path, as_attachment=True, download_name=script.script_filename)
+#     if not script:
+#         flash('Script not found', 'danger')
+#         return redirect(url_for('scripts'))
+
+#     # Serve the file for download
+#     return send_file(script.script_file_path, as_attachment=True, download_name=script.script_filename)
 
 @app.route('/shortcuts', methods=['GET', 'POST'])
 def shortcuts():
@@ -85,12 +90,13 @@ def shortcuts():
         if photo and script_filename:
             filename = secure_filename(photo.filename)
             photo_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            # photoshop_path ="C:\\Program Files (x86)\\Photoshop CS6\\Photoshop.exe"
             photo.save(photo_path)
             #script_file_path = os.path.join(app.config['SCRIPTS_FOLDER'], script_filename)
             
             #script_file_path = "C:/Users/Gabriel Scott/OneDrive/Desktop/Capstone2023-shortcuts/app/static/scripts" + "/" + script_filename
             #script_file_path = os.path.join("C:\\Users\\Gabriel Scott\\OneDrive\\Desktop\\Capstone2023-shortcuts\\app\\static\\scripts", script_filename)
-            script_file_path = "C:\\Users\\kalis\\Capstone2023-shortcuts\\app\\static\\scripts" + "\\" +  script_filename
+            script_file_path = "C:\\Users\\canda\\Desktop\\capstone\\Capstone2023-shortcuts\\app\\static\\scripts" + "\\" +  script_filename
             print (script_file_path)
             print (photo_path)
 
@@ -101,6 +107,8 @@ def shortcuts():
 
             # Call the function to execute the selected script file
             execute_script(script_file_path)
+            # run_photoshop_script(photoshop_path, script_file_path)
+
 
             # Flash message or any other response you want to return to the user
             #flash('File uploaded and script executed successfully.')
@@ -109,39 +117,14 @@ def shortcuts():
 
            # return jsonify({"success": True}), 200
         
-
     uploadform = UploadForm()
     return render_template('shortcuts.html', uploadform=uploadform)
 
-
 # Set OpenAI API key
-openai.api_key = "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"
+openai.api_key = "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"
 
 # Initialize text-to-speech engine
 engine = pyttsx3.init()
-
-# Function to transcribe audio
-# def transcribe_audio(filename):
-#     recognizer = sr.Recognizer()
-#     with sr.AudioFile(audio) as source:
-#         ar = recognizer.record(source)
-#     try:
-#         text = recognizer.recognize_google(ar)
-#         print("text:")
-#         print(text)
-#     except Exception as e:
-#             print("Unknown error has occurred", e)
-#     return text
-
-# Function to get OpenAI response
-# def get_openai_response(prompt):
-#     try:
-#         reply = get_openai_response("Convert to ExtendScript"+text)
-#         print("GPT-3 says:", reply)
-#         #return redirect(url_for("loading",photo=filename, text=text, reply=reply))
-#     except Exception as e:
-#         print("Unknown error has occurred", e)
-#     return reply
 
 # Function to convert speech to text
 def convert_to_text(audio):
@@ -155,138 +138,71 @@ def convert_to_text(audio):
             print("Unknown error has occurred", e)
     return text
 
-'''def generate_extendscript(text):
-    try:
-        reply = get_openai_response("Convert to ExtendScript"+text)
-        print("GPT-3 says:", reply)
-        return redirect(url_for("loading",photo=filename, text=text, reply=reply)) (comment out)
-    except Exception as e:
-        print("Unknown error has occurred", e)
-    print(reply)
-    return reply'''
-
 def generate_unique_filename():
     # Generate a unique filename using UUID (Universally Unique Identifier)
     return str(uuid.uuid4()) + ".jsx"
 
-def generate_extendscript(text,photopath):
+def generate_extendscript(text, photopath):
     try:
-        reply = get_openai_response("Convert this text to ExtendScript"+text+"the path to photo is "+ photopath +"do not Include the File System Object and Save edited photo to the editedphotos folder as JPEG file type and close the app. Please ensure code is ready to run using photoshop so give an accurate response as runnig of script is automated.")
-        #print("GPT-3 says:", reply)
-        #return redirect(url_for("loading",photo=filename, text=text, reply=reply))
+        reply = get_openai_response("Convert this text to ExtendScript"+text+"the path to photo is "+ photopath +"do not Include the File System Object and Save edited photo to the editedphotos folder as JPEG file type and close the app. Please ensure code is ready to run using photoshop so give an accurate response as running of script is automated.")
     except Exception as e:
         print("Unknown error has occurred", e)
     return reply
 
-
 def run_photoshop_script(photoshop_path, script_path):
     command = f'"{photoshop_path}" "{script_path}"'
-  
     completed_process = subprocess.run(command, shell=True, capture_output=True, text=True)
-    
     
     if completed_process.returncode == 0:
         print("Photo edited successfully.")
-        #subprocess.run(["taskkill", "/f", "/im", "C:\Program Files (x86)\Photoshop CS6\Photoshop.exe"], check=True, capture_output=True)
-        #return redirect(url_for("loading"))
     else:
         print("An error occurred while editing photo.")
         print("Error message:", completed_process.stderr)
-
 
 @app.route('/upload', methods=['POST', 'GET'])
 #@login_required
 def upload():
     photoform = PhotoForm()
-    
-    
+
     if photoform.validate_on_submit():
-        
-        photo = photoform.photo.data # we could also use request.files['photo']
-        audio = photoform.audio.data      
+        photo = photoform.photo.data
+        audio = photoform.audio.data
 
         filename = secure_filename(photo.filename)
         photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         print(filename)
-    
-        
+
         filenameAudio = secure_filename(audio.filename)
         print(filenameAudio)
-        #audio.save(os.path.join(app.config['UPLOAD_FOLDER'], filenameAudio))
         text = convert_to_text(audio)
-         
 
-        photopath = "C:\\Users\\kalis\\Capstone2023-shortcuts\\uploads\\"+ filename
-        reply = generate_extendscript(text,photopath)
+        photopath = "C:\\Users\\canda\\Desktop\\capstone\\Capstone2023-shortcuts\\uploads" + filename
+        reply = generate_extendscript(text, photopath) 
         print(reply)
-        photoshop_path ="C:\Program Files (x86)\Photoshop CS6\Photoshop.exe"
-       
+        photoshop_path = "C:\Program Files (x86)\Photoshop CS6\Photoshop.exe" 
+
+        # if reply:
         try:
-            file_path = "C:\\Users\\kalis\\Capstone2023-shortcuts\\uploads\\"+ "trial.jsx"
-            #file_path.save
-            
-            # Write the text to the .jsx file
-            with open(file_path, "w") as jsx_file:
+            # Generate a unique filename for the script
+            script_filename = generate_unique_filename()
+
+            # Write the script content to the .jsx file in the library_scripts_folder
+            script_dest_path = "C:\\Users\\canda\\Desktop\\capstone\\Capstone2023-shortcuts\\scripts" + script_filename
+            with open(script_dest_path, "w") as jsx_file:
                 jsx_file.write(reply)
-            run_photoshop_script(photoshop_path, file_path)
-            return redirect(url_for("loading",photo=filename))
-            #os.startfile(photoshop_path)
-            #execute_script(script_path)
+
+            # Run the generated ExtendScript using Photoshop
+            run_photoshop_script(photoshop_path, script_dest_path)
+
+            # Redirect to the loading page with the appropriate arguments
+            return redirect(url_for("loading", photo=filename))
         except Exception as e:
             print ("An error occurred:", str(e))
-        
-
-        #return redirect(url_for("loading",photo=filename, text=text, reply=reply))
+        # If script generation fails, handle the error accordingly
+        # flash('Error occurred while generating script', 'danger')
+        # return redirect(url_for('upload'))
 
     return render_template('upload.html', form=photoform)
- 
-# @app.route('/upload', methods=['POST', 'GET'])
-# #@login_required
-# def upload():
-#     photoform = PhotoForm()
-    
-    
-#     if photoform.validate_on_submit():
-        
-#         photo = photoform.photo.data # we could also use request.files['photo']
-#         audio = photoform.audio.data      
-
-#         filename = secure_filename(photo.filename)
-#         photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-#         print(filename)
-    
-          
-#         filenameAudio = secure_filename(audio.filename)
-#         print(filenameAudio)
-#         #audio.save(os.path.join(app.config['UPLOAD_FOLDER'], filenameAudio))
-#         text = convert_to_text(audio)
-         
-
-#         photopath = "C:\\Users\\kalis\\Capstone2023-changes\\uploads\\"+ filename
-#         #photopath = "C:\\Users\\Gabriel Scott\\OneDrive\\Desktop\\Capstone2023-shortcuts\\uploads\\" + filename
-#         reply = generate_extendscript(text,photopath)
-#         print(reply)
-#         photoshop_path ="C:\Program Files (x86)\Photoshop CS6\Photoshop.exe"
-       
-#         try:
-#            # file_path = "C:\\Users\\kalis\\Capstone2023-changes\\uploads\\"+ "trial.jsx"
-#             file_path = "C:\\Users\\Gabriel Scott\\OneDrive\\Desktop\\Capstone2023-shortcuts\\uploads" + "trial.jsx"
-#             #file_path.save
-            
-#             # Write the text to the .jsx file
-#             with open(file_path, "w") as jsx_file:
-#                 jsx_file.write(reply)
-#             run_photoshop_script(photoshop_path, file_path,filename)
-#             return redirect(url_for("loading",photo=filename))
-#             #os.startfile(photoshop_path)
-#             #execute_script(script_path)
-#         except Exception as e:
-#             print ("An error occurred:", str(e))
-        
-
-#         #return redirect(url_for("loading",photo=filename, text=text, reply=reply))
-
-#     return render_template('upload.html', form=photoform)
 
 # # Route to handle user speech input from microphone
 # @app.route('/process_microphone', methods=['POST'])
@@ -331,6 +247,29 @@ def get_uploaded_images():
             filenames.append(filename)
     return filenames
 
+def get_edited_images():
+    upload_dir = os.path.join(os.getcwd(), app.config['EDITS_FOLDER'])
+    filenames = []
+    for filename in os.listdir(upload_dir):
+        if filename.endswith('.jpg') or filename.endswith('.png'):
+            filenames.append(filename)
+    return filenames
+
+def get_uploaded_scripts():
+    scripts_dir = os.path.join(os.getcwd(), app.config['LIBRARY_SCRIPTS_FOLDER'])
+    scripts = []
+
+    for filename in os.listdir(scripts_dir):
+        if filename.endswith('.jsx'): 
+            script_path = os.path.join(scripts_dir, filename)
+            scripts.append({'script_filename': filename, 'script_file_path': script_path})
+
+    return scripts
+
+@app.route('/designs/<filename>')
+def get_design(filename):
+    return send_from_directory(os.path.join(os.getcwd(), app.config['EDITS_FOLDER']), filename)
+
 @app.route('/uploads/<filename>')
 def get_image(filename):
     return send_from_directory(os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER']), filename)
@@ -338,6 +277,10 @@ def get_image(filename):
 @app.route('/editedphotos/<filename>')
 def get_image1(filename):
     return send_from_directory(os.path.join(os.getcwd(), app.config['EDITS_FOLDER']), filename)
+
+@app.route('/scripts/<filename>')
+def get_script(filename):
+    return send_from_directory(os.path.join(os.getcwd(), app.config['LIBRARY_SCRIPTS_FOLDER']), filename)
 
 @app.route('/command')
 def command():
@@ -399,7 +342,6 @@ def register():
     return render_template('register.html', form=userform)
 
 def allowed_file(filename):
-    # Add more allowed file extensions if needed
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'jpg', 'jpeg', 'png', 'gif'}
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -420,7 +362,6 @@ def login():
 
     return render_template('login.html', form=form)
 
-
 @app.route('/logout')
 #@login_required
 def logout():
@@ -432,16 +373,12 @@ def logout():
 def loading():
     filename = request.args.get('photo','')
     editedimage = get_image(filename)
-    
     status_message = f"Process complete.<br>Edited Photo:"
-
     return render_template('loading.html', status=status_message,filename=filename)
 
 @login_manager.user_loader
 def load_user(id):
     return db.session.execute(db.select(User).filter_by(id=id)).scalar()
-
- 
 
 # Run the Flask application
 if __name__ == "__main__":

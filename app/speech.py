@@ -3,7 +3,7 @@ import pyttsx3
 import speech_recognition as sr
 
 # Set OpenAI API key
-openai.api_key = "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"
+openai.api_key = "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"
 
 # Initialize text-to-speech engine
 engine = pyttsx3.init()
@@ -26,7 +26,7 @@ def get_openai_response(prompt):
         max_tokens=4000,
         n=1,
         stop=None,
-        temperature=0.5,
+        temperature=0.1,
     )
     return response.choices[0].text.strip()
 

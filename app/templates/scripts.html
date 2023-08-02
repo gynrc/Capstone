@@ -4,7 +4,8 @@
   <h1>Scripts</h1>
   <ul>
     {% for script in scripts %}
-      <li>{{ script.script_file_path }}</li>
+      <li>{{ script.script_filename }}</li>
     {% endfor %}
   </ul>
 {% endblock %}
+

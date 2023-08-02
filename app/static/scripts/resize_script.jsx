@@ -1,5 +1,7 @@
 // Resize an image in Photoshop using ExtendScript
 
+// var editedPhotoPath = "C:\\Users\\canda\\Desktop\\Capstone2023-shortcuts\\editedphotos";
+
 // Check if a document is open
 if (app.documents.length > 0) {
   // Get the active document
@@ -17,3 +19,10 @@ if (app.documents.length > 0) {
 } else {
   alert("No document is open in Photoshop.");
 }
+
+// Save the edited photo
+// var saveOptions = new JPEGSaveOptions();
+// doc.saveAs(File(editedPhotoPath), saveOptions, true);
+
+// // Close the photo
+// doc.close(SaveOptions.DONOTSAVECHANGES);

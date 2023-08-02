@@ -40,11 +40,11 @@
                         {{ form.audio(id="audio-file", class="form-control-file") }} 
                     </div>
 
-                    <div>
+                    <!-- <div>
                         <img src="{{ url_for('static', filename='images/microphone.png') }}" alt="Microphone" id="microphone" width="60" height="60">
                         <p id="text" class="text"></p>
                         <p id="response" class="response"></p>
-                    </div>
+                    </div> -->
 
                     <button type="submit" class="btn btn-primary">Upload</button>
                 </form>
@@ -117,7 +117,7 @@ document.getElementById('photo').addEventListener('change', function(event) {
     const dropArea = document.getElementById('dropArea');
     
     if (file) {
-      dropArea.innerHTML = `<p>Selected Image Path: ${file.name}</p>`;
+      dropArea.innerHTML = `<p>Selected Image: ${file.name}</p>`;
     } else {
       dropArea.innerHTML = '<p>Drag and drop your photo here or click to select</p>'; // Show default text
     }

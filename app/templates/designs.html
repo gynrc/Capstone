@@ -2,9 +2,14 @@
 
 {% block main %}
   <h1>Designs</h1>
-  <ul>
-    {% for design in designs %}
-      <li>{{ design.design_file_path }}</li>
-    {% endfor %}
-  </ul>
+  <div class="image-grid-container">
+    <div class="image-grid">
+      {% for image_url in image_urls %}
+        <div class="image-grid-item">
+          <img src="{{ image_url }}" class="img-fluid" alt="Design" />
+        </div>
+      {% endfor %}
+    </div>
+  </div>
 {% endblock %}
+

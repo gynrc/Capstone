@@ -61,25 +61,27 @@ def execute_script(script_path): #this script is ran when the app in open
 
     time.sleep(5)
     
-    # Press 'File'
-    pi.hotkey('alt', 'f') 
+    # # Press 'File'
+    # pi.hotkey('alt', 'f') 
 
-    # Press 'Save As' (the specific shortcut might vary based on the Photoshop version and configuration)
-    pi.hotkey('shift', 'ctrl', 's') 
+    # # Press 'Save As' (the specific shortcut might vary based on the Photoshop version and configuration)
+    # pi.hotkey('shift', 'ctrl', 's') 
 
-    # Wait for the 'Save As' dialog to appear (adjust this time if necessary)
-    time.sleep(5)
+    # # Wait for the 'Save As' dialog to appear (adjust this time if necessary)
+    # time.sleep(5)
 
-    # Type the output path for the edited image
-    pi.write('./editedphotos')
+    # saved_path = "C:\\Users\\canda\\Desktop\\Capstone2023-shortcuts\\editedphotos"
 
-    # Press 'Enter' to confirm the save operation
-    pi.press('enter')
+    # # Type the output path for the edited image
+    # pi.write("" + saved_path)
 
-    time.sleep(5)  # Wait for the save operation to complete (adjust this time if necessary)
+    # # Press 'Enter' to confirm the save operation
+    # pi.press('enter')
 
-    # Close the 'Save As' dialog by pressing 'Escape'
-    pi.press('esc')
+    # time.sleep(5)  # Wait for the save operation to complete (adjust this time if necessary)
+
+    # # Close the 'Save As' dialog by pressing 'Escape'
+    # pi.press('esc')
 
 '''def run_photoshop_script(photoshop_path, script_path):
     command = f'"{photoshop_path}" "{script_path}"'
